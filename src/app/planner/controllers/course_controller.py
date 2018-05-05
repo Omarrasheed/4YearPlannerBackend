@@ -41,16 +41,18 @@ def boards_crud():
 def pull():
 	if request.args.get('title') == None:
 		query = courses_dao.all_courses()
+		print(query)
+		jsonList = []
 		for each in query:
-		jsonList.append({'title': query.title,
-  						'number': query.number,
-  						'subject': query.subject,
-  						'description': query.description,
-  						'term': query.term,
-  						'creditsMin': query.creditsMin,
-  						'creditsMax': query.creditsMax,
-  						'prereqs': query.prereqs,
-  						'id': query.id
+			jsonList.append({'title': each.title,
+  						'number': each.number,
+  						'subject': each.subject,
+  						'description': each.description,
+  						'term': each.term,
+  						'creditsMin': each.creditsMin,
+  						'creditsMax': each.creditsMax,
+  						'prereqs': each.prereqs,
+  						'id': each.id
   						})
 		return jsonify({'success': True,
 						'data':{
