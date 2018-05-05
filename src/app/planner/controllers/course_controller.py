@@ -37,61 +37,28 @@ def boards_crud():
 						}})
 @planner.route('/courses', methods=['GET'])
 def pull():
+	parameterDict = {}
+	requestedSubject = request.args.get('subject')
+	requestedNumber = request.args.get('number')
+	requestedTerm = request.args.get('term')
+	if requestedSubject != None:
+		parameterDict['subject'] = requestedSubject
+	if requestedNumber != None:
+		parameterDict['number'] = requestedNumber
+	if requestedTerm != None:
+		parameterDict['term'] = requestedTerm
+	query = courses_dao.begin_filter(parameterDict)
 	jsonList = []
-	if request.args.get('subject') == None and request.args.get('term') == None:
-		print('hit first')
-		query = courses_dao.all_courses()
-		
-		for each in query:
-			jsonList.append({'title': each.title,
-							'number': each.number,
-							'subject': each.subject,
-							'description': each.description,
-							'term': each.term,
-							'creditsMin': each.creditsMin,
-							'creditsMax': each.creditsMax,
-							'prereqs': each.prereqs,
-							'id': each.id
-							})
-		return jsonify({'success': True,
-						'data':{
-							'courses': jsonList
-							}})
-	elif request.args.get('term') != None:
-		print('hit second')
-		term = request.args.get("term")
-		query = courses_dao.courses_by_term(term)
-		for each in query:
-			jsonList.append({'title': each.title,
-							'number': each.number,
-							'subject': each.subject,
-							'description': each.description,
-							'term': each.term,
-							'creditsMin': each.creditsMin,
-							'creditsMax': each.creditsMax,
-							'prereqs': each.prereqs,
-							'id': each.id
-							})
-		return jsonify({'success': True,
-							'data': {
-								'courses': jsonList
-							}})
-	elif request.args.get('subject') != None:
-		print('hit third')
-		subject = request.args.get('subject')
-		query = courses_dao.courses_by_subject(subject)
-		for each in query:
-			jsonList.append({'title': each.title,
-							'number': each.number,
-							'subject': each.subject,
-							'description': each.description,
-							'term': each.term,
-							'creditsMin': each.creditsMin,
-							'creditsMax': each.creditsMax,
-							'prereqs': each.prereqs,
-							'id': each.id
-							})
-		return jsonify({'success': True,
-							'data': {
-								'courses': jsonList
-							}})
+	for each in query:
+		jsonList.append({'title': each.title,
+						'number': each.number,
+						'subject': each.subject,
+						'description': each.description,
+						'term': each.term,
+						'creditsMin': each.creditsMin,
+						'creditsMax': each.creditsMax,
+						'prereqs': each.prereqs,
+						'id': each.id
+						})
+	return jsonify({'success': True,
+								   'data': {'courses': jsonList}})
