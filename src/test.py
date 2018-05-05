@@ -81,19 +81,70 @@ class test(unittest.TestCase):
     db.session.execute('DELETE FROM courses;')
     self.commit()
     self.app_context.pop()
+    
+  
 
   def test_create_board(self):
-    input_data = dict(title='title',
-                      subject='subject',
-                      number='number',
-                      description='description',
-                      term='term',
-                      creditsMax=1,
-                      creditsMin=0,
-                      prereqs='prereqs')
-    result = json.loads(self.post(input_data, 'courses').data)
-    assert(self.is_sub(self.coursePostColumns,result['data']['course'].keys()))
-    assert(result['success'])
+    
+    titleList = []
+    allClasses = []
+
+    # Pull all subjects and append to titleList
+    response = requests.get("https://classes.cornell.edu/api/2.0/config/subjects.json?roster=SP18")
+    data = response.json()
+    for each in data['data']['subjects']:
+	    titleList.append(str(each['value']))
+
+    def pullInfoForSubject(subj):
+	    request = "https://classes.cornell.edu/api/2.0/search/classes.json?roster=SP18&subject=" + subj
+	    response = requests.get(request)
+	    data = response.json()
+	    for each in data['data']['classes']:
+		    classObject = []
+		    classObject.append(each['subject'].encode("utf-8"))
+		    classObject.append(each['catalogNbr'].encode("utf-8"))
+		    classObject.append(each['titleLong'].encode("utf-8"))
+		    if each['description'] != None:
+			    classObject.append(each['description'].encode("utf-8"))
+		    else:
+			    classObject.append(None)
+
+		    if each['catalogWhenOffered'] != None:
+			    classObject.append(each["catalogWhenOffered"].encode("utf-8"))
+		    else:
+			    classObject.append(None)
+
+		    if each["enrollGroups"][0]["unitsMaximum"] != None:
+			    classObject.append(each["enrollGroups"][0]["unitsMaximum"])
+		    else:
+			    classObject.append(None)
+
+		    if each["enrollGroups"][0]["unitsMinimum"] != None:
+			    classObject.append(each["enrollGroups"][0]["unitsMinimum"])
+		    else:
+			    classObject.append(None)
+
+		    if each["catalogPrereqCoreq"] != "":
+			    classObject.append(each['catalogPrereqCoreq'])
+		    else:
+			    classObject.append(None)
+		    allClasses.append(classObject)
+
+      for each in titleList:
+	      pullInfoForSubject(each)
+    
+    for each in allClasses:
+      input_data = dict(title=each[2],
+                        subject=each[0],
+                        number=each[1],
+                        description=each[3],
+                        term=each[4],
+                        creditsMax=each[5],
+                        creditsMin=each[6],
+                        prereqs=each[7])
+      result = json.loads(self.post(input_data, 'courses').data)
+      assert(self.is_sub(self.coursePostColumns,result['data']['course'].keys()))
+      assert(result['success'])
 
   def test_delete_board(self):
     input_data = dict(title='My Awesome Board')
