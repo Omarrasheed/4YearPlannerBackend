@@ -5,13 +5,23 @@ from . import *
 Add more methods below!!!
 """
 
-def courses_by_subject(course_subject):
-  	"""
-  	Get board by ID
-  	"""
-  	return Course.query.filter_by(subject=course_subject)
+def begin_filter(parameterDictionary):
+	keys = parameterDictionary.keys()
+	if 'subject' in keys and 'number' in keys:
+		query = Course.query.filter_by(subject=parameterDictionary['subject'], number=parameterDictionary['number'])
+	elif 'subject' in keys:
+		query = Course.query.filter_by(subject=parameterDictionary['subject'])
+	elif 'number' in keys:
+		query = Course.query.filter_by(number=parameterDictionary['number'])
+	else:
+		query = Course.query.all()
+	if 'term' in keys:
+		finalList = courses_by_term(parameterDictionary['term'], query)
+		return finalList
+	return query
 
-def courses_by_term(term):
+
+def courses_by_term(term,query):
 	"""
 	Get Course by Subject
 	"""
@@ -20,7 +30,6 @@ def courses_by_term(term):
 	realSpring = "Spring"
 	secondSpring = "spring"
 
-	query = Course.query.all()
 	for each in query:
 		if term == 'fall':
 			if (realFall in each.term):
@@ -33,9 +42,6 @@ def courses_by_term(term):
 				finalList.append(each)
 	return finalList
 
-
-def all_courses():
-	return Course.query.all()
 
 def create_course(subject, number, title, description, term, creditsMax, creditsMin, prereqs):
 	"""
