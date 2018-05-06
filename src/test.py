@@ -8,7 +8,7 @@ from sqlalchemy.orm import joinedload
 import requests
 import json
 
-"""titleList = []
+titleList = []
 allClasses = []
 
 # Pull all subjects and append to titleList
@@ -30,36 +30,36 @@ def pullInfoForSubject(subj):
 				newTitle = each['titleLong'].encode('ascii', 'ignore')
 				classObject.append(newTitle)
 				if each['description'] != None:
-						new = each['description'].encode("ascii", 'ignore')
-						classObject.append(new)
+					new = each['description'].encode("ascii", 'ignore')
+					classObject.append(new)
 				else:
-						classObject.append(" ")
+					classObject.append(" ")
 				
 				if each['catalogWhenOffered'] != None:
-						new = each['catalogWhenOffered'].encode("ascii", 'ignore')
-						classObject.append(new)
+					new = each['catalogWhenOffered'].encode("ascii", 'ignore')
+					classObject.append(new)
 				else:
-						classObject.append(" ")
+					classObject.append(" ")
 				
 				if each["enrollGroups"][0]["unitsMaximum"] != None:
-						classObject.append(each["enrollGroups"][0]["unitsMaximum"])
+					classObject.append(each["enrollGroups"][0]["unitsMaximum"])
 				else:
-						classObject.append(" ")
+					classObject.append(" ")
 				
 				if each["enrollGroups"][0]["unitsMinimum"] != None:
-						classObject.append(each["enrollGroups"][0]["unitsMinimum"])
+					classObject.append(each["enrollGroups"][0]["unitsMinimum"])
 				else:
-						classObject.append(" ")
+					classObject.append(" ")
 				
 				if each["catalogPrereqCoreq"] != "":
-						classObject.append(each['catalogPrereqCoreq'])
+					classObject.append(each['catalogPrereqCoreq'])
 				else:
-						classObject.append(" ")
-				allClasses.append(classObject)
+					classObject.append(" ")
+					allClasses.append(classObject)
 						
 for each in titleList:
 		pullInfoForSubject(each)
-print(allClasses)"""
+print(allClasses)
 
 class test(unittest.TestCase):
 	coursePostColumns = [
@@ -132,28 +132,28 @@ class test(unittest.TestCase):
 		self.app_context.push()
 
 	def tearDown(self):
-		db.session.execute('DELETE FROM course;')
+		db.session.execute('DELETE FROM courses;')
 		self.commit()
 		self.app_context.pop()
 
-	"""def test_create_board(self):
+	def test_create_board(self):
 		
 
 
 		for each in allClasses:
 				input_data = dict(title=each[2],
-													subject=each[0],
-													number=each[1],
-													description=each[3],
-													term=each[4],
-													creditsMax=each[5],
-													creditsMin=each[6],
-													prereqs=each[7])
+							subject=each[0],
+							number=each[1],
+							description=each[3],
+							term=each[4],
+							creditsMax=each[5],
+							creditsMin=each[6],
+							prereqs=each[7])
 				result = json.loads(self.post(input_data, 'courses').data)
 				assert(self.is_sub(self.coursePostColumns,result['data']['course'].keys()))
-				assert(result['success'])"""
+				assert(result['success'])
 
-	"""def test_delete_board(self):
+	def test_delete_board(self):
 		input_data = dict(title='My Awesome Board')
 		result = json.loads(self.post(input_data, 'courses').data)
 		result_id = int(result['data']['board']['id'])
@@ -163,31 +163,31 @@ class test(unittest.TestCase):
 
 		boards = json.loads(self.app.get('/planner/courses').data)['data']['boards']
 		has_board = len([b['id'] for b in boards if b['id'] == result_id]) > 0
-		assert(not has_board)"""
+		assert(not has_board)
 
-	"""def test_get_boards(self):
+	def test_get_boards(self):
 		input_data1 = dict(title='title',
-											subject='subject',
-											number='number',
-											description='description',
-											term='term',
-											creditsMax=1,
-											creditsMin=0,
-											prereqs='prereqs')
+					subject='subject',
+					number='number',
+					description='description',
+					term='term',
+					creditsMax=1,
+					creditsMin=0,
+					prereqs='prereqs')
 		input_data = dict(title='title2',
-											subject='subject2',
-											number='number2',
-											description='description2',
-											term='term2',
-											creditsMax=12,
-											creditsMin=0,
-											prereqs='prereqs2')
+					subject='subject2',
+					number='number2',
+					description='description2',
+					term='term2',
+					creditsMax=12,
+					creditsMin=0,
+					prereqs='prereqs2')
 		result_id1 = json.loads(self.post(input_data1, 'courses').data)['data']['course']['id']
 		result_id2 = json.loads(self.post(input_data, 'courses').data)['data']['course']['id']
 		result = json.loads(self.app.get('/planner/courses').data)
 		boards = result['data']['courses']
 		assert(self.is_sub(self.coursePostColumns,boards[0].keys()))
-		assert(result['success'])"""
+		assert(result['success'])
 
 	def test_subject(self):
 		result_id = dict(subject='MATH')
@@ -280,44 +280,6 @@ class test(unittest.TestCase):
 			assert(each['subject'] == 'MATH' and each['number'] == '1110' and ('Spring' in each['term'] or 'spring' in each['term'] or 'Fall' in each['term']))
 			assert(result['success'])
 		print('subject + number + term passed')
-
-
-	"""def test_advance_element(self):
-		input_data = dict(title='My Awesome Board')
-		result_id = json.loads(self.post(input_data, 'boards').data)['data']['board']['id']
-		input_data1 = dict(
-			board_id=result_id,
-			description='A Todo Task, I should get this done!',
-			category='inprogress')
-		input_data2 = dict(
-			board_id=result_id,
-			description='A Todo Task, I should get this done!',
-			category='inprogress')
-		input_data3 = dict(
-			board_id=result_id,
-			description='A Todo Task, I should get this done!',
-			category='todo')
-		input_data4 = dict(
-			board_id=result_id,
-			description='A Todo Task, I should get this done!',
-			category='done')
-		self.post(input_data1, 'board_elements')
-		self.post(input_data2, 'board_elements')
-		result_id2 = json.loads(self.post(input_data3, 'board_elements').data)['data']['board_element']['id']
-		result_id3 = json.loads(self.post(input_data4, 'board_elements').data)['data']['board_element']['id']
-		result = json.loads(self.app.get('/kanban/boards').data)
-		assert(result['data']['boards'][0]['todo_count'] == 1)
-		assert(result['data']['boards'][0]['inprogress_count'] == 2)
-		assert(result['data']['boards'][0]['done_count'] == 1)
-		input_data1 = dict(id=result_id2)
-		result = json.loads(self.post(input_data1, 'board_elements/advance').data)
-		assert(result == {'success': True})
-		input_data2 = dict(id=result_id3)
-		self.post(input_data2, 'board_elements/advance')
-		result = json.loads(self.app.get('/kanban/boards').data)
-		assert(result['data']['boards'][0]['todo_count'] == 0)
-		assert(result['data']['boards'][0]['inprogress_count'] == 3)
-		assert(result['data']['boards'][0]['done_count'] == 1)"""
 
 if __name__ == '__main__':
 	unittest.main()
