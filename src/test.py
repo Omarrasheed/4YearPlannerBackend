@@ -12,54 +12,72 @@ titleList = []
 allClasses = []
 
 # Pull all subjects and append to titleList
-response = requests.get("https://classes.cornell.edu/api/2.0/config/subjects.json?roster=FA18")
-data = response.json()
+response = requests.get("https://classes.cornell.edu/api/2.0/config/subjects.json?roster=FA18").text
+data = json.loads(str(response))
 for each in data['data']['subjects']:
-		titleList.append(str(each['value']))
+	titleList.append(str(each['value']))
 
 def pullInfoForSubject(subj):
-		request = "https://classes.cornell.edu/api/2.0/search/classes.json?roster=FA18&subject=" + subj
-		response = requests.get(request)
-		data = response.json()
-		for each in data['data']['classes']:
-				classObject = []
-				newSubject = each['subject'].encode("ascii", 'ignore')
-				classObject.append(newSubject)
-				newNbr = each['catalogNbr'].encode("ascii", 'ignore')
-				classObject.append(newNbr)
-				newTitle = each['titleLong'].encode('ascii', 'ignore')
-				classObject.append(newTitle)
-				if each['description'] != None:
-					new = each['description'].encode("ascii", 'ignore')
-					classObject.append(new)
-				else:
-					classObject.append(" ")
+	request = "https://classes.cornell.edu/api/2.0/search/classes.json?roster=FA18&subject=" + subj
+	response = requests.get(request).text
+	data = json.loads(str(response))
+	for each in data['data']['classes']:
+
+		# Each Class that will be appended to full ClassList
+		classObject = []
+
+		# Subject Attribute
+		newSubject = each['subject'].encode("utf-8")
+		newSubject = newSubject.replace('\xc2\xa0', ' ')
+		classObject.append(newSubject)
+
+		# Class Number Attribute
+		newNbr = str(each['catalogNbr'].encode("utf-8"))
+		newNbr = newNbr.replace('\xc2\xa0', ' ')
+		classObject.append(newNbr)
+
+		# Title Attribute
+		newTitle = str(each['titleLong'].encode("utf-8"))
+		newTitle = newTitle.replace('\xc2\xa0', ' ')
+		classObject.append(newTitle)
+
+		# Description Attribute
+		if each['description'] != None:
+			newDesc = str(each['description'].encode("utf-8"))
+			newDesc = newDesc.replace('\xc2\xa0', ' ')
+			classObject.append(newDesc)
+		else:
+			classObject.append(" ")
+		
+		# Term Attribute
+		if each['catalogWhenOffered'] != None:
+			newTerm = str(each['catalogWhenOffered'].encode("utf-8"))
+			newTerm = newTerm.replace('\xc2\xa0', ' ')
+			classObject.append(newTerm)
+		else:
+			classObject.append(" ")
 				
-				if each['catalogWhenOffered'] != None:
-					new = each['catalogWhenOffered'].encode("ascii", 'ignore')
-					classObject.append(new)
-				else:
-					classObject.append(" ")
-				
-				if each["enrollGroups"][0]["unitsMaximum"] != None:
-					classObject.append(each["enrollGroups"][0]["unitsMaximum"])
-				else:
-					classObject.append(" ")
-				
-				if each["enrollGroups"][0]["unitsMinimum"] != None:
-					classObject.append(each["enrollGroups"][0]["unitsMinimum"])
-				else:
-					classObject.append(" ")
-				
-				if each["catalogPrereqCoreq"] != "":
-					classObject.append(each['catalogPrereqCoreq'])
-				else:
-					classObject.append(" ")
-					allClasses.append(classObject)
-						
+		# UnitsMax Attribute
+		if each["enrollGroups"][0]["unitsMaximum"] != None:
+			classObject.append(each["enrollGroups"][0]["unitsMaximum"])
+		else:
+			classObject.append(" ")
+		
+		# UnitsMin Attribute
+		if each["enrollGroups"][0]["unitsMinimum"] != None:
+			classObject.append(each["enrollGroups"][0]["unitsMinimum"])
+		else:
+			classObject.append(" ")
+		
+		# Prerequisites Attribute
+		if each["catalogPrereqCoreq"] != "":
+			classObject.append(each['catalogPrereqCoreq'])
+		else:
+			classObject.append(" ")
+			allClasses.append(classObject)
+					
 for each in titleList:
-		pullInfoForSubject(each)
-print(allClasses)
+	pullInfoForSubject(each)
 
 class test(unittest.TestCase):
 	coursePostColumns = [
@@ -137,11 +155,8 @@ class test(unittest.TestCase):
 		self.app_context.pop()
 
 	def test_create_board(self):
-		
-
-
 		for each in allClasses:
-				input_data = dict(title=each[2],
+			input_data = dict(title=each[2],
 							subject=each[0],
 							number=each[1],
 							description=each[3],
@@ -149,9 +164,9 @@ class test(unittest.TestCase):
 							creditsMax=each[5],
 							creditsMin=each[6],
 							prereqs=each[7])
-				result = json.loads(self.post(input_data, 'courses').data)
-				assert(self.is_sub(self.coursePostColumns,result['data']['course'].keys()))
-				assert(result['success'])
+			result = json.loads(self.post(input_data, 'courses').data)
+			assert(self.is_sub(self.coursePostColumns,result['data']['course'].keys()))
+			assert(result['success'])
 
 	def test_delete_board(self):
 		input_data = dict(title='My Awesome Board')
