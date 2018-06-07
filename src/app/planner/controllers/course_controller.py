@@ -11,7 +11,6 @@ def boards_crud():
 	Route for creating new courses
 	"""
 
-	# Pull all of the Attributes
 	subject      = request.args.get('subject')
 	number       = request.args.get('number')
 	title        = request.args.get('title')
@@ -23,7 +22,6 @@ def boards_crud():
 	gradingType  = request.args.get('gradingType')
 	distribution = request.args.get('distribution')
 
-	# Creates the course object
 	course = courses_dao.create_course(subject,
 										number,
 										title,
@@ -58,7 +56,6 @@ def pull():
 	"""
 	parameterDict = {}
 
-	# Pulls specific querying attributes (if they exist)
 	requestedSubject = request.args.get('subject')
 	requestedNumber  = request.args.get('number')
 	requestedTerm    = request.args.get('term')
