@@ -7,23 +7,23 @@ Add more methods below!!!
 
 def begin_filter(parameterDictionary):
 	keys = parameterDictionary.keys()
-	if 'subject' in keys and 'number' in keys:
-		query = Course.query.filter_by(subject=parameterDictionary['subject'], number=parameterDictionary['number'])
-	elif 'subject' in keys:
-		query = Course.query.filter_by(subject=parameterDictionary['subject'])
-	elif 'number' in keys:
-		query = Course.query.filter_by(number=parameterDictionary['number'])
-	else:
-		query = Course.query.all()
 	if 'term' in keys:
 		finalList = courses_by_term(parameterDictionary['term'], query)
 		return finalList
+	if 'subject' in keys and 'number' in keys:
+		query = Course.query.filter_by(subject.like("%" + "%s" % parameterDictionary['subject'] + "%"), number.like("%" + "%s" % parameterDictionary['number'] + "%"))
+	elif 'subject' in keys:
+		query = Course.query.filter_by(subject.like("%" + "%s" % parameterDictionary['subject'] + "%"))
+	elif 'number' in keys:
+		query = Course.query.filter_by(number.like("%" + "%s" % parameterDictionary['number'] + "%"))
+	else:
+		query = Course.query.all()
 	return query
 
 
 def courses_by_term(term,query):
 	"""
-	Get Course by Subject
+	Get Courses by Term
 	"""
 	finalList = []
 	realFall = "Fall"
@@ -43,18 +43,20 @@ def courses_by_term(term,query):
 	return finalList
 
 
-def create_course(subject, number, title, description, term, creditsMax, creditsMin, prereqs):
+def create_course(subject, number, title, description, term, creditsMax, creditsMin, prereqs, gradingType, distribution):
 	"""
 	Create new course
 	"""
-	course = Course(subject=subject,
-					number=number, 
-					title=title, 
-					description=description,
-					term=term,
-					creditsMax=creditsMax,
-					creditsMin=creditsMin,
-					prereqs=prereqs)
+	course = Course(subject      =subject,
+					number       =number, 
+					title        =title, 
+					description  =description,
+					term         =term,
+					creditsMax   =creditsMax,
+					creditsMin   =creditsMin,
+					prereqs      =prereqs,
+					gradingType  =gradingType,
+					distribution =distribution)
 	db.session.add(course)
 	try:
 		db.session.commit()
