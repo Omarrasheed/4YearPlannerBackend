@@ -6,20 +6,22 @@ Add more methods below!!!
 """
 
 def begin_filter(parameterDictionary):
+	"""
+	Determines which filteres were given and queries based on them
+	"""
 	keys = parameterDictionary.keys()
+	if 'subject' in keys and 'number' in keys:
+		query = Course.query.filter(Course.subject.like(parameterDictionary['subject'] + "%"), Course.number.like("%" + parameterDictionary['number'] + "%")).all()
+	elif 'subject' in keys:
+		query = Course.query.filter(Course.subject.like(parameterDictionary['subject'] + "%")).all()
+	elif 'number' in keys:
+		query = Course.query.filter(Course.number.like(parameterDictionary['number'] + "%")).all()
+	else:
+		query = Course.query.all()
 	if 'term' in keys:
 		finalList = courses_by_term(parameterDictionary['term'], query)
 		return finalList
-	if 'subject' in keys and 'number' in keys:
-		query = Course.query.filter_by(subject.like("%" + "%s" % parameterDictionary['subject'] + "%"), number.like("%" + "%s" % parameterDictionary['number'] + "%"))
-	elif 'subject' in keys:
-		query = Course.query.filter_by(subject.like("%" + "%s" % parameterDictionary['subject'] + "%"))
-	elif 'number' in keys:
-		query = Course.query.filter_by(number.like("%" + "%s" % parameterDictionary['number'] + "%"))
-	else:
-		query = Course.query.all()
 	return query
-
 
 def courses_by_term(term,query):
 	"""
@@ -57,6 +59,7 @@ def create_course(subject, number, title, description, term, creditsMax, credits
 					prereqs      =prereqs,
 					gradingType  =gradingType,
 					distribution =distribution)
+
 	db.session.add(course)
 	try:
 		db.session.commit()
