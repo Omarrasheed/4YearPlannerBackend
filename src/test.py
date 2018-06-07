@@ -22,8 +22,7 @@ def pullInfoForSubject(subj):
 	response = requests.get(request).text
 	data = json.loads(str(response))
 	for each in data['data']['classes']:
-
-		# Each Class that will be appended to full ClassList
+		# Initialize new list for class
 		classObject = []
 
 		# Subject Attribute
@@ -47,7 +46,7 @@ def pullInfoForSubject(subj):
 			newDesc = newDesc.replace('\xc2\xa0', ' ')
 			classObject.append(newDesc)
 		else:
-			classObject.append(" ")
+			classObject.append(None)
 		
 		# Term Attribute
 		if each['catalogWhenOffered'] != None:
@@ -55,31 +54,50 @@ def pullInfoForSubject(subj):
 			newTerm = newTerm.replace('\xc2\xa0', ' ')
 			classObject.append(newTerm)
 		else:
-			classObject.append(" ")
+			classObject.append(None)
 				
 		# UnitsMax Attribute
 		if each["enrollGroups"][0]["unitsMaximum"] != None:
-			classObject.append(each["enrollGroups"][0]["unitsMaximum"])
+			classObject.append(str(each["enrollGroups"][0]["unitsMaximum"]))
 		else:
-			classObject.append(" ")
+			classObject.append(None)
 		
 		# UnitsMin Attribute
 		if each["enrollGroups"][0]["unitsMinimum"] != None:
-			classObject.append(each["enrollGroups"][0]["unitsMinimum"])
+			classObject.append(str(each["enrollGroups"][0]["unitsMinimum"]))
 		else:
-			classObject.append(" ")
+			classObject.append(None)
 		
 		# Prerequisites Attribute
-		if each["catalogPrereqCoreq"] != "":
-			classObject.append(each['catalogPrereqCoreq'])
+		if each["catalogPrereqCoreq"] != None:
+
+			prereq = str(each['catalogPrereqCoreq'].encode('utf-8'))
+			prereq = prereq.replace('\xc2\xa0', ' ')
+			classObject.append(prereq)
 		else:
-			classObject.append(" ")
-			allClasses.append(classObject)
+			classObject.append(None)
+			
+		# Grading Type Attribute
+		gradingType = str(each['enrollGroups'][0]['gradingBasisShort'].encode('utf-8'))
+		classObject.append(gradingType)
+
+		# Distribution Requirements Attribute
+		if each['catalogDistr'] != None:
+			distr = str(each['catalogDistr'])
+			distr = distr.replace('(', '')
+			classObject.append(distr)
+		else:
+			classObject.append(None)
+
+		# Add each class to final list of classes
+		allClasses.append(classObject)
 					
+# Run Script on each subject in Cornell's database
 for each in titleList:
 	pullInfoForSubject(each)
 
 class test(unittest.TestCase):
+
 	coursePostColumns = [
 		'title',
 		'subject',
@@ -89,35 +107,8 @@ class test(unittest.TestCase):
 		'creditsMax',
 		'term',
 		'prereqs',
-	]
-
-	boardGetAllColumns = [
-		'inprogress_count',
-		'todo_count',
-		'title',
-		'created_at',
-		'updated_at',
-		'id',
-		'done_count'
-	]
-
-	boardGetColumns = [
-		'title',
-		'created_at',
-		'updated_at',
-		'done',
-		'inprogress',
-		'todo',
-		'id'
-	]
-
-	elementPostColumns = [
-		'board_id',
-		'category',
-		'description',
-		'created_at',
-		'updated_at',
-		'id'
+		'distribution',
+		'gradingType'
 	]
 
 	def input_dict_to_args(self, input_dict):
@@ -156,14 +147,16 @@ class test(unittest.TestCase):
 
 	def test_create_board(self):
 		for each in allClasses:
-			input_data = dict(title=each[2],
-							subject=each[0],
-							number=each[1],
-							description=each[3],
-							term=each[4],
-							creditsMax=each[5],
-							creditsMin=each[6],
-							prereqs=each[7])
+			input_data = dict(subject    = each[0],
+							number       = each[1],
+							title        = each[2],
+							description  = each[3],
+							term         = each[4],
+							creditsMax   = each[5],
+							creditsMin   = each[6],
+							prereqs      = each[7],
+							gradingType  = each[8],
+							distribution = each[9])
 			result = json.loads(self.post(input_data, 'courses').data)
 			assert(self.is_sub(self.coursePostColumns,result['data']['course'].keys()))
 			assert(result['success'])
