@@ -168,8 +168,9 @@ class test(unittest.TestCase):
 		self.app_context.pop()
 
 	def test_create_course(self):
-		"""
-		Does this add spec?
+
+		# UNCOMMENT WHEN ADDING TO THE DATABASE
+
 		"""
 		for each in allClasses:
 			input_data = dict(subject    = each[0],
@@ -185,9 +186,6 @@ class test(unittest.TestCase):
 			result = json.loads(self.post(input_data, 'courses').data)
 			assert(self.is_sub(self.coursePostColumns,result['data']['course'].keys()))
 			assert(result['success'])
-
-		# UNCOMMENT ONLY FOR TESTING PURPOSES 
-
 		"""
 		input_data = dict(subject    = 'MATH',
 							number   = '1110',
@@ -211,12 +209,8 @@ class test(unittest.TestCase):
 		assert(self.is_sub(self.coursePostColumns,result2['data']['course'].keys()))
 		assert(self.is_sub(self.coursePostColumns,result3['data']['course'].keys()))
 		assert(result['success'])
-		"""
 
 	def test_get_all_courses(self):
-		
-		# UNCOMMENT ONLY FOR TESTING PURPOSES
-		"""
 		input_data1 = dict(title    = 'title',
 							subject = 'subject',
 							number  = '1110',
@@ -231,7 +225,6 @@ class test(unittest.TestCase):
 
 		result = json.loads(self.post(input_data1, 'courses').data)
 		result2 = json.loads(self.post(input_data2, 'courses').data)
-		"""
 		all_result = json.loads(self.app.get('/planner/courses').data)
 		courses = all_result['data']['courses']
 		assert(len(courses) == len(allClasses))
