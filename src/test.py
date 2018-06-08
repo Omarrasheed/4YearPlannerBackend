@@ -7,84 +7,99 @@ from app import app,db,base
 from sqlalchemy.orm import joinedload
 import requests
 import json
+import unicodedata
 
-titleList = []
+subjectList = []
 allClasses = []
 
-"""# Pull all subjects and append to titleList
-response = requests.get("https://classes.cornell.edu/api/2.0/config/subjects.json?roster=FA18").text
-data = json.loads(str(response))
-for each in data['data']['subjects']:
-	titleList.append(str(each['value']))
-
-def pullInfoForSubject(subj):
-	request = "https://classes.cornell.edu/api/2.0/search/classes.json?roster=FA18&subject=" + subj
-	response = requests.get(request).text
+def pullSubjects(season, year):
+""" 
+Pull all subjects and append to subjectList
+"""
+	response = requests.get("https://classes.cornell.edu/api/2.0/config/subjects.json?roster=" + season[:3].upper() + str(year%100)).text
 	data = json.loads(str(response))
+	for each in data['data']['subjects']:
+		subjectList.append(str(each['value']))
+
+def pullInfoForSubject(subj, season, year):
+	"""
+	Pull all of the classes from Cornell API & parse information
+	Only takes:
+		Title
+		Subject
+		Class Number
+		Description
+		Term offered in
+		Max amount of units offered for
+		Minimum amount of units offered for
+		Prerequisites
+		Grading type
+		Distribution
+	"""
+
+	request = "https://classes.cornell.edu/api/2.0/search/classes.json?roster=" + season[:3].upper() + str(year%100) + "&subject=" + subj
+	response = requests.get(request).text
+	data = json.loads(response)
 	for each in data['data']['classes']:
 		# Initialize new list for class
 		classObject = []
 
 		# Subject Attribute
-		newSubject = each['subject'].encode("utf-8")
-		newSubject = newSubject.replace('\xc2\xa0', ' ')
+		newSubject = unicodedata.normalize('NFKD', each['subject']).encode('ascii', 'ignore')
 		classObject.append(newSubject)
 
 		# Class Number Attribute
-		newNbr = str(each['catalogNbr'].encode("utf-8"))
-		newNbr = newNbr.replace('\xc2\xa0', ' ')
+		newNbr = unicodedata.normalize('NFKD', each['catalogNbr']).encode('ascii', 'ignore')
 		classObject.append(newNbr)
 
 		# Title Attribute
-		newTitle = str(each['titleLong'].encode("utf-8"))
-		newTitle = newTitle.replace('\xc2\xa0', ' ')
+		newTitle = unicodedata.normalize('NFKD', each['titleLong']).encode('ascii', 'ignore')
 		classObject.append(newTitle)
 
 		# Description Attribute
 		if each['description'] != None:
-			newDesc = str(each['description'].encode("utf-8"))
-			newDesc = newDesc.replace('\xc2\xa0', ' ')
+			newDesc = unicodedata.normalize('NFKD', each['description']).encode('ascii', 'ignore')
 			classObject.append(newDesc)
 		else:
 			classObject.append(None)
 		
 		# Term Attribute
 		if each['catalogWhenOffered'] != None:
-			newTerm = str(each['catalogWhenOffered'].encode("utf-8"))
-			newTerm = newTerm.replace('\xc2\xa0', ' ')
+			newTerm = unicodedata.normalize('NFKD', each['catalogWhenOffered']).encode('ascii', 'ignore')
 			classObject.append(newTerm)
 		else:
 			classObject.append(None)
 				
 		# UnitsMax Attribute
 		if each["enrollGroups"][0]["unitsMaximum"] != None:
-			classObject.append(str(each["enrollGroups"][0]["unitsMaximum"]))
+			unitsMax = str(each['enrollGroups'][0]['unitsMaximum'])
+			classObject.append(unitsMax)
 		else:
 			classObject.append(None)
 		
 		# UnitsMin Attribute
 		if each["enrollGroups"][0]["unitsMinimum"] != None:
-			classObject.append(str(each["enrollGroups"][0]["unitsMinimum"]))
+			unitsMin = str(each['enrollGroups'][0]['unitsMinimum'])
+			classObject.append(unitsMin)
 		else:
 			classObject.append(None)
 		
 		# Prerequisites Attribute
 		if each["catalogPrereqCoreq"] != None:
-
-			prereq = str(each['catalogPrereqCoreq'].encode('utf-8'))
-			prereq = prereq.replace('\xc2\xa0', ' ')
+			prereq = unicodedata.normalize('NFKD', each['catalogPrereqCoreq']).encode('ascii', 'ignore')
 			classObject.append(prereq)
 		else:
 			classObject.append(None)
 			
 		# Grading Type Attribute
-		gradingType = str(each['enrollGroups'][0]['gradingBasisShort'].encode('utf-8'))
+		gradingType = unicodedata.normalize('NFKD', each['enrollGroups'][0]['gradingBasisShort']).encode('ascii', 'ignore')
 		classObject.append(gradingType)
 
 		# Distribution Requirements Attribute
 		if each['catalogDistr'] != None:
 			distr = str(each['catalogDistr'])
 			distr = distr.replace('(', '')
+			distr = distr.replace(')', '')
 			classObject.append(distr)
 		else:
 			classObject.append(None)
@@ -93,8 +108,15 @@ def pullInfoForSubject(subj):
 		allClasses.append(classObject)
 					
 # Run Script on each subject in Cornell's database
-for each in titleList:
-	pullInfoForSubject(each)"""
+# UNCOMMENT WHEN INPUTTING CLASSES TO DATABASE
+
+"""
+season = 'fall'
+year = 2018
+pullSubjects(season, year)
+for subject in subjectList:
+	pullInfoForSubject(each, season, year)
+"""
 
 class test(unittest.TestCase):
 
@@ -141,12 +163,15 @@ class test(unittest.TestCase):
 		self.app_context.push()
 
 	def tearDown(self):
-		db.session.execute('DELETE FROM courses;')
+		db.session.execute('DELETE FROM course;')
 		self.commit()
 		self.app_context.pop()
 
 	def test_create_course(self):
-		"""for each in allClasses:
+		"""
+		Does this add spec?
+		"""
+		for each in allClasses:
 			input_data = dict(subject    = each[0],
 							number       = each[1],
 							title        = each[2],
@@ -159,7 +184,11 @@ class test(unittest.TestCase):
 							distribution = each[9])
 			result = json.loads(self.post(input_data, 'courses').data)
 			assert(self.is_sub(self.coursePostColumns,result['data']['course'].keys()))
-			assert(result['success'])"""
+			assert(result['success'])
+
+		# UNCOMMENT ONLY FOR TESTING PURPOSES 
+
+		"""
 		input_data = dict(subject    = 'MATH',
 							number   = '1110',
 							title    = 'something important',
@@ -182,8 +211,12 @@ class test(unittest.TestCase):
 		assert(self.is_sub(self.coursePostColumns,result2['data']['course'].keys()))
 		assert(self.is_sub(self.coursePostColumns,result3['data']['course'].keys()))
 		assert(result['success'])
+		"""
 
 	def test_get_all_courses(self):
+		
+		# UNCOMMENT ONLY FOR TESTING PURPOSES
+		"""
 		input_data1 = dict(title    = 'title',
 							subject = 'subject',
 							number  = '1110',
@@ -194,11 +227,14 @@ class test(unittest.TestCase):
 							number  = '1110',
 							term    = 'fall')
 
+		
+
 		result = json.loads(self.post(input_data1, 'courses').data)
 		result2 = json.loads(self.post(input_data2, 'courses').data)
+		"""
 		all_result = json.loads(self.app.get('/planner/courses').data)
 		courses = all_result['data']['courses']
-		assert(len(courses) == 2)
+		assert(len(courses) == len(allClasses))
 		for each in range(len(courses)):
 			assert(self.is_sub(self.coursePostColumns,courses[each].keys()))
 		assert(all_result['success'])
