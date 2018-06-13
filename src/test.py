@@ -16,7 +16,7 @@ def pullSubjects(season, year):
 """ 
 Pull all subjects and append to subjectList
 """
-	response = requests.get("https://classes.cornell.edu/api/2.0/config/subjects.json?roster=" + season[:3].upper() + str(year%100)).text
+	response = requests.get("https://classes.cornell.edu/api/2.0/config/subjects.json?roster=" + season[:2].upper() + str(year%100)).text
 	data = json.loads(str(response))
 	for each in data['data']['subjects']:
 		subjectList.append(str(each['value']))
@@ -37,7 +37,7 @@ def pullInfoForSubject(subj, season, year):
 		Distribution
 	"""
 
-	request = "https://classes.cornell.edu/api/2.0/search/classes.json?roster=" + season[:3].upper() + str(year%100) + "&subject=" + subj
+	request = "https://classes.cornell.edu/api/2.0/search/classes.json?roster=" + season[:2].upper() + str(year%100) + "&subject=" + subj
 	response = requests.get(request).text
 	data = json.loads(response)
 	for each in data['data']['classes']:
