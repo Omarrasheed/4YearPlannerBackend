@@ -11,16 +11,16 @@ def begin_filter(parameterDictionary):
 	"""
 	keys = parameterDictionary.keys()
 	if 'subject' in keys and 'number' in keys:
-		query = Course.query.filter(Course.subject.like(parameterDictionary['subject'] + "%"), Course.number.like(parameterDictionary['number'] + "%")).all()
+		query = Course.query.filter(Course.subject.like(parameterDictionary['subject'] + "%"), Course.number.like(parameterDictionary['number'] + "%")).order_by(Course.subject, Course.number).all()
 	elif 'subject' in keys:
-		query = Course.query.filter(Course.subject.like(parameterDictionary['subject'] + "%")).all()
+		query = Course.query.filter(Course.subject.like(parameterDictionary['subject'] + "%")).order_by(Course.subject, Course.number).all()
 	elif 'number' in keys:
-		query = Course.query.filter(Course.number.like(parameterDictionary['number'] + "%")).all()
+		query = Course.query.filter(Course.number.like(parameterDictionary['number'] + "%")).order_by(Course.subject, Course.number).all()
 	elif 'recommended' in keys:
-		query = Course.query.filter_by(acadGroup == parameterDictionary['recommended']).all()
-		query += Course.query.filter_by(acadgroup != parameterDictionary['recommended']).all()
+		query = Course.query.filter_by(acadGroup == parameterDictionary['recommended']).order_by(Course.subject, Course.number).all()
+		query += Course.query.filter_by(acadgroup != parameterDictionary['recommended']).order_by(Course.subject, Course.number).all()
 	else:
-		query = Course.query.all()
+		query = Course.query.order_by(Course.subject, Course.number).all()
 	if 'term' in keys:
 		finalList = courses_by_term(parameterDictionary['term'], query)
 		return finalList
