@@ -13,9 +13,9 @@ subjectList = []
 allClasses = []
 
 def pullSubjects(season, year):
-""" 
-Pull all subjects and append to subjectList
-"""
+	""" 
+	Pull all subjects and append to subjectList
+	"""
 	response = requests.get("https://classes.cornell.edu/api/2.0/config/subjects.json?roster=" + season[:2].upper() + str(year%100)).text
 	data = json.loads(str(response))
 	for each in data['data']['subjects']:
@@ -35,6 +35,7 @@ def pullInfoForSubject(subj, season, year):
 		Prerequisites
 		Grading type
 		Distribution
+		Academic Group
 	"""
 
 	request = "https://classes.cornell.edu/api/2.0/search/classes.json?roster=" + season[:2].upper() + str(year%100) + "&subject=" + subj
@@ -104,19 +105,19 @@ def pullInfoForSubject(subj, season, year):
 		else:
 			classObject.append(None)
 
+		acadGroup = unicodedata.normalize('NFKD', each['acadGroup']).encode('ascii', 'ignore')
+		classObject.append(acadGroup)
+
 		# Add each class to final list of classes
 		allClasses.append(classObject)
-					
-# Run Script on each subject in Cornell's database
-# UNCOMMENT WHEN INPUTTING CLASSES TO DATABASE
 
-"""
-season = 'fall'
-year = 2018
-pullSubjects(season, year)
-for subject in subjectList:
-	pullInfoForSubject(each, season, year)
-"""
+def runScript(season, year):
+
+	pullSubjects(season, year)
+	for subject in subjectList:
+		pullInfoForSubject(subject, season, year)
+
+runScript('spring', 2018)
 
 class test(unittest.TestCase):
 
@@ -130,7 +131,8 @@ class test(unittest.TestCase):
 		'term',
 		'prereqs',
 		'distribution',
-		'gradingType'
+		'gradingType',
+		'acadGroup'
 	]
 
 	def input_dict_to_args(self, input_dict):
@@ -171,7 +173,7 @@ class test(unittest.TestCase):
 
 		# UNCOMMENT WHEN ADDING TO THE DATABASE
 
-		"""
+		
 		for each in allClasses:
 			input_data = dict(subject    = each[0],
 							number       = each[1],
@@ -182,7 +184,8 @@ class test(unittest.TestCase):
 							creditsMin   = each[6],
 							prereqs      = each[7],
 							gradingType  = each[8],
-							distribution = each[9])
+							distribution = each[9],
+							acadGroup    = each[10])
 			result = json.loads(self.post(input_data, 'courses').data)
 			assert(self.is_sub(self.coursePostColumns,result['data']['course'].keys()))
 			assert(result['success'])
@@ -208,7 +211,7 @@ class test(unittest.TestCase):
 		assert(self.is_sub(self.coursePostColumns,result['data']['course'].keys()))
 		assert(self.is_sub(self.coursePostColumns,result2['data']['course'].keys()))
 		assert(self.is_sub(self.coursePostColumns,result3['data']['course'].keys()))
-		assert(result['success'])
+		assert(result['success'])"""
 
 	def test_get_all_courses(self):
 		input_data1 = dict(title    = 'title',
@@ -223,8 +226,8 @@ class test(unittest.TestCase):
 
 		
 
-		result = json.loads(self.post(input_data1, 'courses').data)
-		result2 = json.loads(self.post(input_data2, 'courses').data)
+		"""result = json.loads(self.post(input_data1, 'courses').data)
+		result2 = json.loads(self.post(input_data2, 'courses').data)"""
 		all_result = json.loads(self.app.get('/planner/courses').data)
 		courses = all_result['data']['courses']
 		assert(len(courses) == len(allClasses))
@@ -324,5 +327,14 @@ class test(unittest.TestCase):
 			assert(result['success'])
 		print('subject + number + term passed')
 
+	def test_academic_group(self):
+		result_id= dict(subject='MATH', number='1110', term='spring', acadGroup='AS')
+		result = json.loads(self.app.get('/planner/courses?%s' % self.input_dict_to_args(result_id)).data)
+		courses = result['data']['courses']
+		for each in courses:
+			assert(self.is_sub(self.coursePostColumns,each.keys()))
+			assert(each['acadGroup'] == 'AS')
+			assert(result['success'])
+		print('Academic Group passed')
 if __name__ == '__main__':
 	unittest.main()
