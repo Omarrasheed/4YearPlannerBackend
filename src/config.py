@@ -1,10 +1,10 @@
 import os
 
 # Database info
-DB_USERNAME  = os.environ['PLANNER_DB_USERNAME']
-DB_PASSWORD  = os.environ['PLANNER_DB_PASSWORD']
-DB_HOST      = os.environ['PLANNER_DB_HOST']
-DB_NAME      = os.environ['PLANNER_DB_NAME']
+DB_USERNAME  = os.environ['DB_USERNAME']
+DB_PASSWORD  = os.environ['DB_PASSWORD']
+DB_HOST      = os.environ['DB_HOST']
+DB_NAME      = os.environ['DB_NAME']
 DB_URL       = 'mysql://{}:{}@{}/{}'.format(DB_USERNAME, DB_PASSWORD, DB_HOST, DB_NAME)
 
 # Ensure Python path
