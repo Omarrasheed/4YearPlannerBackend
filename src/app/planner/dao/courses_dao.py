@@ -17,8 +17,8 @@ def begin_filter(parameterDictionary):
 	elif 'number' in keys:
 		query = Course.query.filter(Course.number.like(parameterDictionary['number'] + "%")).order_by(Course.subject, Course.number).all()
 	elif 'recommended' in keys:
-		query = Course.query.filter_by(acadGroup == parameterDictionary['recommended']).order_by(Course.subject, Course.number).all()
-		query += Course.query.filter_by(acadgroup != parameterDictionary['recommended']).order_by(Course.subject, Course.number).all()
+		query = Course.query.filter_by(acadGroup=parameterDictionary['recommended']).order_by(Course.subject, Course.number).all()
+		query += Course.query.filter(Course.acadGroup != parameterDictionary['recommended']).order_by(Course.subject, Course.number).all()
 	else:
 		query = Course.query.order_by(Course.subject, Course.number).all()
 	if 'term' in keys:
