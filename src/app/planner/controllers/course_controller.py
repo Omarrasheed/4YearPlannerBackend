@@ -21,6 +21,7 @@ def boards_crud():
 	prereqs      = request.args.get('prereqs')
 	gradingType  = request.args.get('gradingType')
 	distribution = request.args.get('distribution')
+	acadGroup    = request.args.get('acadGroup')
 
 	course = courses_dao.create_course(subject,
 										number,
@@ -31,7 +32,8 @@ def boards_crud():
 										creditsMin,
 										prereqs,
 										gradingType,
-										distribution)
+										distribution,
+										acadGroup)
 
 	return jsonify({'success': True,
 					'data': {
@@ -45,7 +47,8 @@ def boards_crud():
 							'creditsMax': creditsMax,
 							'prereqs': prereqs,
 							'gradingType': gradingType,
-							'distribution': distribution
+							'distribution': distribution,
+							'acadGroup': acadGroup
 							}
 						}
 					})
@@ -59,6 +62,7 @@ def pull():
 	requestedSubject = request.args.get('subject')
 	requestedNumber  = request.args.get('number')
 	requestedTerm    = request.args.get('term')
+	recommended      = request.args.get('recommended')
 
 	if requestedSubject != None:
 		parameterDict['subject'] = requestedSubject
@@ -66,6 +70,8 @@ def pull():
 		parameterDict['number'] = requestedNumber
 	if requestedTerm != None:
 		parameterDict['term'] = requestedTerm
+	if recommended != None:
+		parameterDict['recommended'] = recommended
 	query = courses_dao.begin_filter(parameterDict)
 	jsonList = []
 	for each in query:
@@ -79,7 +85,8 @@ def pull():
 						'prereqs': each.prereqs,
 						'id': each.id,
 						'gradingType': each.gradingType,
-						'distribution': each.distribution
+						'distribution': each.distribution,
+						'acadGroup': each.acadGroup
 						})
 	return jsonify({'success': True,
 						'data': {

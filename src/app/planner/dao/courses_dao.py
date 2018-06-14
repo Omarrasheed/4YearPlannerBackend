@@ -11,11 +11,14 @@ def begin_filter(parameterDictionary):
 	"""
 	keys = parameterDictionary.keys()
 	if 'subject' in keys and 'number' in keys:
-		query = Course.query.filter(Course.subject.like(parameterDictionary['subject'] + "%"), Course.number.like("%" + parameterDictionary['number'] + "%")).all()
+		query = Course.query.filter(Course.subject.like(parameterDictionary['subject'] + "%"), Course.number.like(parameterDictionary['number'] + "%")).all()
 	elif 'subject' in keys:
 		query = Course.query.filter(Course.subject.like(parameterDictionary['subject'] + "%")).all()
 	elif 'number' in keys:
 		query = Course.query.filter(Course.number.like(parameterDictionary['number'] + "%")).all()
+	elif 'recommended' in keys:
+		query = Course.query.filter_by(acadGroup == parameterDictionary['recommended']).all()
+		query += Course.query.filter_by(acadgroup != parameterDictionary['recommended']).all()
 	else:
 		query = Course.query.all()
 	if 'term' in keys:
@@ -44,8 +47,7 @@ def courses_by_term(term,query):
 				finalList.append(each)
 	return finalList
 
-
-def create_course(subject, number, title, description, term, creditsMax, creditsMin, prereqs, gradingType, distribution):
+def create_course(subject, number, title, description, term, creditsMax, creditsMin, prereqs, gradingType, distribution, acadGroup):
 	"""
 	Create new course
 	"""
@@ -58,7 +60,8 @@ def create_course(subject, number, title, description, term, creditsMax, credits
 					creditsMin   =creditsMin,
 					prereqs      =prereqs,
 					gradingType  =gradingType,
-					distribution =distribution)
+					distribution =distribution,
+					acadGroup    =acadGroup)
 
 	db.session.add(course)
 	try:

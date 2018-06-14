@@ -10,9 +10,10 @@ class Course(Base):
   term          = db.Column(db.String(100))
   creditsMax    = db.Column(db.Integer)
   creditsMin    = db.Column(db.Integer)
-  prereqs       = db.Column(db.String(256), nullable = True)
-  distribution  = db.Column(db.String(10), nullable = True)
+  prereqs       = db.Column(db.Text)
+  distribution  = db.Column(db.String(100))
   gradingType   = db.Column(db.String(100))
+  acadGroup     = db.Column(db.String(10))
 
   def __init__(self, **kwargs):
     """
@@ -28,3 +29,4 @@ class Course(Base):
     self.prereqs      = kwargs.get('prereqs', None)
     self.distribution = kwargs.get('distribution', None)
     self.gradingType  = kwargs.get('gradingType')
+    self.acadGroup    = kwargs.get('acadGroup')
