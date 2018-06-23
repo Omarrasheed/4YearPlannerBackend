@@ -3,7 +3,7 @@ from . import *
 class Course(Base):
   __tablename__ = 'courses'
   id            = db.Column(db.Integer, primary_key=True)
-  title         = db.Column(db.String(256), unique=True, nullable=False)
+  title         = db.Column(db.String(256), nullable=False)
   subject       = db.Column(db.String(10), nullable=False)
   number        = db.Column(db.String(5), nullable=False)
   description   = db.Column(db.Text)
@@ -14,6 +14,7 @@ class Course(Base):
   distribution  = db.Column(db.String(100))
   gradingType   = db.Column(db.String(100))
   acadGroup     = db.Column(db.String(10))
+  subjNum       = db.Column(db.String(20), unique=True)
 
   def __init__(self, **kwargs):
     """
@@ -30,3 +31,4 @@ class Course(Base):
     self.distribution = kwargs.get('distribution', None)
     self.gradingType  = kwargs.get('gradingType')
     self.acadGroup    = kwargs.get('acadGroup')
+    self.subjNum      = kwargs.get('subjNum')

@@ -42,74 +42,78 @@ def pullInfoForSubject(subj, season, year):
 	response = requests.get(request).text
 	data = json.loads(response)
 	for each in data['data']['classes']:
-		# Initialize new list for class
-		classObject = []
+		if each['enrollGroups'][0]['classSections'][0]['campus'] == 'MAIN':
+			# Initialize new list for class
+			classObject = {}
 
-		# Subject Attribute
-		newSubject = unicodedata.normalize('NFKD', each['subject']).encode('ascii', 'ignore')
-		classObject.append(newSubject)
-
-		# Class Number Attribute
-		newNbr = unicodedata.normalize('NFKD', each['catalogNbr']).encode('ascii', 'ignore')
-		classObject.append(newNbr)
-
-		# Title Attribute
-		newTitle = unicodedata.normalize('NFKD', each['titleLong']).encode('ascii', 'ignore')
-		classObject.append(newTitle)
-
-		# Description Attribute
-		if each['description'] != None:
-			newDesc = unicodedata.normalize('NFKD', each['description']).encode('ascii', 'ignore')
-			classObject.append(newDesc)
-		else:
-			classObject.append(None)
-		
-		# Term Attribute
-		if each['catalogWhenOffered'] != None:
-			newTerm = unicodedata.normalize('NFKD', each['catalogWhenOffered']).encode('ascii', 'ignore')
-			classObject.append(newTerm)
-		else:
-			classObject.append(None)
-				
-		# UnitsMax Attribute
-		if each["enrollGroups"][0]["unitsMaximum"] != None:
-			unitsMax = str(each['enrollGroups'][0]['unitsMaximum'])
-			classObject.append(unitsMax)
-		else:
-			classObject.append(None)
-		
-		# UnitsMin Attribute
-		if each["enrollGroups"][0]["unitsMinimum"] != None:
-			unitsMin = str(each['enrollGroups'][0]['unitsMinimum'])
-			classObject.append(unitsMin)
-		else:
-			classObject.append(None)
-		
-		# Prerequisites Attribute
-		if each["catalogPrereqCoreq"] != None:
-			prereq = unicodedata.normalize('NFKD', each['catalogPrereqCoreq']).encode('ascii', 'ignore')
-			classObject.append(prereq)
-		else:
-			classObject.append(None)
+			# Subject Attribute
+			newSubject = unicodedata.normalize('NFKD', each['subject']).encode('ascii', 'ignore')
+			classObject['subject'] = newSubject
 			
-		# Grading Type Attribute
-		gradingType = unicodedata.normalize('NFKD', each['enrollGroups'][0]['gradingBasisShort']).encode('ascii', 'ignore')
-		classObject.append(gradingType)
+			# Class Number Attribute
+			newNbr = unicodedata.normalize('NFKD', each['catalogNbr']).encode('ascii', 'ignore')
+			classObject['number'] = newNbr
 
-		# Distribution Requirements Attribute
-		if each['catalogDistr'] != None:
-			distr = str(each['catalogDistr'])
-			distr = distr.replace('(', '')
-			distr = distr.replace(')', '')
-			classObject.append(distr)
-		else:
-			classObject.append(None)
+			# Title Attribute
+			newTitle = unicodedata.normalize('NFKD', each['titleLong']).encode('ascii', 'ignore')
+			classObject['title'] = newTitle
 
-		acadGroup = unicodedata.normalize('NFKD', each['acadGroup']).encode('ascii', 'ignore')
-		classObject.append(acadGroup)
+			# Description Attribute
+			if each['description'] != None:
+				newDesc = unicodedata.normalize('NFKD', each['description']).encode('ascii', 'ignore')
+				classObject['description'] = newDesc
+			else:
+				classObject['description'] = None
+		
+			# Term Attribute
+			if each['catalogWhenOffered'] != None:
+				newTerm = unicodedata.normalize('NFKD', each['catalogWhenOffered']).encode('ascii', 'ignore')
+				classObject['term'] = newTerm
+			else:
+				classObject['term'] = None
+					
+			# UnitsMax Attribute
+			if each["enrollGroups"][0]["unitsMaximum"] != None:
+				unitsMax = str(each['enrollGroups'][0]['unitsMaximum'])
+				classObject['unitsMax'] = unitsMax
+			else:
+				classObject['unitsMax'] = None
+			
+			# UnitsMin Attribute
+			if each["enrollGroups"][0]["unitsMinimum"] != None:
+				unitsMin = str(each['enrollGroups'][0]['unitsMinimum'])
+				classObject['unitsMin'] = unitsMin
+			else:
+				classObject['unitsMin'] = None
+			
+			# Prerequisites Attribute
+			if each["catalogPrereqCoreq"] != None:
+				prereq = unicodedata.normalize('NFKD', each['catalogPrereqCoreq']).encode('ascii', 'ignore')
+				classObject['prereqs'] = prereq
+			else:
+				classObject['prereqs'] = None
+				
+			# Grading Type Attribute
+			gradingType = unicodedata.normalize('NFKD', each['enrollGroups'][0]['gradingBasisShort']).encode('ascii', 'ignore')
+			classObject['gradingType'] = gradingType
 
-		# Add each class to final list of classes
-		allClasses.append(classObject)
+			# Distribution Requirements Attribute
+			if each['catalogDistr'] != None:
+				distr = str(each['catalogDistr'])
+				distr = distr.replace('(', '')
+				distr = distr.replace(')', '')
+				classObject['distribution'] = distr
+			else:
+				classObject['distribution'] = None
+
+			acadGroup = unicodedata.normalize('NFKD', each['acadGroup']).encode('ascii', 'ignore')
+			classObject['acadGroup'] = acadGroup
+
+			subjNum = newSubject + " " + str(newNbr)
+			classObject['subjNum'] = subjNum
+
+			# Add each class to final list of classes
+			allClasses.append(classObject)
 
 def runScript(season, year):
 
@@ -117,7 +121,7 @@ def runScript(season, year):
 	for subject in subjectList:
 		pullInfoForSubject(subject, season, year)
 
-runScript('spring', 2018)
+runScript('fall', 2018)
 
 class test(unittest.TestCase):
 
@@ -132,7 +136,8 @@ class test(unittest.TestCase):
 		'prereqs',
 		'distribution',
 		'gradingType',
-		'acadGroup'
+		'acadGroup',
+		'subjNum'
 	]
 
 	def input_dict_to_args(self, input_dict):
@@ -172,23 +177,24 @@ class test(unittest.TestCase):
 	def test_create_course(self):
 
 		# UNCOMMENT WHEN ADDING TO THE DATABASE
-
 		
 		for each in allClasses:
-			input_data = dict(subject    = each[0],
-							number       = each[1],
-							title        = each[2],
-							description  = each[3],
-							term         = each[4],
-							creditsMax   = each[5],
-							creditsMin   = each[6],
-							prereqs      = each[7],
-							gradingType  = each[8],
-							distribution = each[9],
-							acadGroup    = each[10])
+			input_data = dict(subject    = each['subject'],
+							number       = each['number'],
+							title        = each['title'],
+							description  = each['description'],
+							term         = each['term'],
+							creditsMax   = each['unitsMax'],
+							creditsMin   = each['unitsMin'],
+							prereqs      = each['prereqs'],
+							gradingType  = each['gradingType'],
+							distribution = each['distribution'],
+							acadGroup    = each['acadGroup'],
+							subjNum      = each['subjNum'])
 			result = json.loads(self.post(input_data, 'courses').data)
 			assert(self.is_sub(self.coursePostColumns,result['data']['course'].keys()))
 			assert(result['success'])
+		
 		"""
 		input_data = dict(subject    = 'MATH',
 							number   = '1110',
@@ -282,7 +288,7 @@ class test(unittest.TestCase):
 			assert('1110' in each['number'])
 			assert(result['success'])
 																														
-			print('just number passed')
+		print('just number passed')
 																																		
 	def test_subject_number(self):
 		result_id= dict(subject='MATH',number='1110')
@@ -328,7 +334,7 @@ class test(unittest.TestCase):
 		print('subject + number + term passed')
 
 	def test_academic_group(self):
-		result_id= dict(subject='MATH', number='1110', term='spring', acadGroup='AS')
+		result_id= dict(recommended='AS')
 		result = json.loads(self.app.get('/planner/courses?%s' % self.input_dict_to_args(result_id)).data)
 		courses = result['data']['courses']
 		for each in courses:

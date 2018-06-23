@@ -22,6 +22,7 @@ def boards_crud():
 	gradingType  = request.args.get('gradingType')
 	distribution = request.args.get('distribution')
 	acadGroup    = request.args.get('acadGroup')
+	subjNum      = request.args.get('subjNum')
 
 	course = courses_dao.create_course(subject,
 										number,
@@ -33,7 +34,8 @@ def boards_crud():
 										prereqs,
 										gradingType,
 										distribution,
-										acadGroup)
+										acadGroup,
+										subjNum)
 
 	return jsonify({'success': True,
 					'data': {
@@ -48,7 +50,8 @@ def boards_crud():
 							'prereqs': prereqs,
 							'gradingType': gradingType,
 							'distribution': distribution,
-							'acadGroup': acadGroup
+							'acadGroup': acadGroup,
+							'subjNum': subjNum
 							}
 						}
 					})
@@ -86,7 +89,8 @@ def pull():
 						'id': each.id,
 						'gradingType': each.gradingType,
 						'distribution': each.distribution,
-						'acadGroup': each.acadGroup
+						'acadGroup': each.acadGroup,
+						'subjNum': each.subjNum
 						})
 	return jsonify({'success': True,
 						'data': {

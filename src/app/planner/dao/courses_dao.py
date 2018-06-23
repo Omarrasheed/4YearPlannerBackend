@@ -47,7 +47,7 @@ def courses_by_term(term,query):
 				finalList.append(each)
 	return finalList
 
-def create_course(subject, number, title, description, term, creditsMax, creditsMin, prereqs, gradingType, distribution, acadGroup):
+def create_course(subject, number, title, description, term, creditsMax, creditsMin, prereqs, gradingType, distribution, acadGroup, subjNum):
 	"""
 	Create new course
 	"""
@@ -61,7 +61,8 @@ def create_course(subject, number, title, description, term, creditsMax, credits
 					prereqs      =prereqs,
 					gradingType  =gradingType,
 					distribution =distribution,
-					acadGroup    =acadGroup)
+					acadGroup    =acadGroup,
+					subjNum      =subjNum)
 
 	db.session.add(course)
 	try:
