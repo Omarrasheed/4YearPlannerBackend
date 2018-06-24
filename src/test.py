@@ -121,7 +121,7 @@ def runScript(season, year):
 	for subject in subjectList:
 		pullInfoForSubject(subject, season, year)
 
-runScript('fall', 2018)
+# runScript('fall', 2018)
 
 class test(unittest.TestCase):
 
@@ -177,7 +177,7 @@ class test(unittest.TestCase):
 	def test_create_course(self):
 
 		# UNCOMMENT WHEN ADDING TO THE DATABASE
-		
+		"""
 		for each in allClasses:
 			input_data = dict(subject    = each['subject'],
 							number       = each['number'],
@@ -194,7 +194,7 @@ class test(unittest.TestCase):
 			result = json.loads(self.post(input_data, 'courses').data)
 			assert(self.is_sub(self.coursePostColumns,result['data']['course'].keys()))
 			assert(result['success'])
-		
+		"""
 		"""
 		input_data = dict(subject    = 'MATH',
 							number   = '1110',
