@@ -236,6 +236,8 @@ class test(unittest.TestCase):
 		result2 = json.loads(self.post(input_data2, 'courses').data)"""
 		all_result = json.loads(self.app.get('/planner/courses').data)
 		courses = all_result['data']['courses']
+		for each in courses[:10]:
+			print (each['subjNum'])
 		assert(len(courses) == len(allClasses))
 		for each in range(len(courses)):
 			assert(self.is_sub(self.coursePostColumns,courses[each].keys()))

@@ -1,5 +1,6 @@
 from app.constants import *
 from . import *
+from sqlalchemy.sql import func
 
 """
 Add more methods below!!!
@@ -10,17 +11,21 @@ def begin_filter(parameterDictionary):
 	Determines which filteres were given and queries based on them
 	"""
 	keys = parameterDictionary.keys()
+
+	# Handles Filters
 	if 'subject' in keys and 'number' in keys:
-		query = Course.query.filter(Course.subject.like(parameterDictionary['subject'] + "%"), Course.number.like(parameterDictionary['number'] + "%")).order_by(Course.number, Course.subject).all()
+		query = Course.query.filter(Course.subject.like(parameterDictionary['subject'] + "%"), Course.number.like(parameterDictionary['number'] + "%")).order_by(func.substr(Course.number, 1, 1), Course.subjNum).all()
 	elif 'subject' in keys:
-		query = Course.query.filter(Course.subject.like(parameterDictionary['subject'] + "%")).order_by(Course.number, Course.subject).all()
+		query = Course.query.filter(Course.subject.like(parameterDictionary['subject'] + "%")).order_by(func.substr(Course.number, 1, 1), Course.subjNum).all()
 	elif 'number' in keys:
-		query = Course.query.filter(Course.number.like(parameterDictionary['number'] + "%")).order_by(Course.number, Course.subject).all()
+		query = Course.query.filter(Course.number.like(parameterDictionary['number'] + "%")).order_by(func.substr(Course.number, 1, 1), Course.subjNum).all()
 	elif 'recommended' in keys:
-		query = Course.query.filter_by(acadGroup=parameterDictionary['recommended']).order_by(Course.number, Course.subject).all()
-		query += Course.query.filter(Course.acadGroup != parameterDictionary['recommended']).order_by(Course.number, Course.subject).all()
+		query = Course.query.filter_by(acadGroup=parameterDictionary['recommended']).order_by(func.substr(Course.number, 1, 1), Course.subjNum).all()
+		# query += Course.query.filter(Course.acadGroup != parameterDictionary['recommended']).order_by(func.substr(Course.number, 1, 1), Course.subjNum).all()
+
+	# Handles All Courses
 	else:
-		query = Course.query.order_by(Course.number, Course.subject).all()
+		query = Course.query.order_by(func.substr(Course.number, 1, 1), Course.subjNum).all()
 	if 'term' in keys:
 		finalList = courses_by_term(parameterDictionary['term'], query)
 		return finalList
